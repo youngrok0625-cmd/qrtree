@@ -94,7 +94,7 @@
   @keyframes glint{0%,70%,100%{transform:scale(0) rotate(0deg);opacity:0}80%{transform:scale(1) rotate(20deg);opacity:1}90%{transform:scale(.3) rotate(40deg);opacity:.6}}
   .hint{z-index:3;min-height:24px;text-align:center;color:#ffe9a8;font-size:15px;padding:0 16px 8px;word-break:keep-all}
   .done-banner{display:none;margin:0 auto 8px;background:rgba(255,217,119,.16);border:1px solid rgba(255,217,119,.45);color:#ffe9a8;border-radius:14px;padding:8px 14px;font-family:"Jua";font-size:16px;text-align:center;max-width:440px}
-  body.complete .done-banner{display:block}
+  body.complete .done-banner{display:none}
   .dock{z-index:4;padding:10px 14px calc(12px + var(--safe-b));background:linear-gradient(180deg,rgba(15,29,58,0),rgba(15,29,58,.55) 30%)}
   .dock .col{display:flex;gap:10px}
   .dock .big{flex:1;font-size:20px;padding:14px}
@@ -180,6 +180,14 @@
   .test button{border:0;border-radius:9px;padding:7px 2px;font-size:11px;background:#fff;box-shadow:0 1px 0 var(--line)}
   .test button.done{opacity:.4}
   .test button.wide{grid-column:span 2;background:#ffe9a8}
+  /* 사진 저장 · 화면만 보기 */
+  .donebar{display:none;gap:8px;justify-content:center;margin:0 auto 6px;width:100%;max-width:480px;padding:0 14px;z-index:4}
+  body.complete .donebar{display:flex}
+  .donebar button{flex:1;border:0;border-radius:14px;padding:11px 8px;font-family:"Jua";font-size:16px;background:rgba(255,248,236,.95);color:var(--ink);box-shadow:0 3px 0 #cdbb9b}
+  .donebar button.pri{background:#ffd977;color:#3b2a00;box-shadow:0 3px 0 #c99400}
+  body.clean .top,body.clean .dock,body.clean .hint,body.clean .done-banner,body.clean .donebar{visibility:hidden}
+  .cleantip{position:fixed;left:50%;bottom:calc(18px + var(--safe-b));transform:translateX(-50%);background:rgba(0,0,0,.45);color:#fff;font-size:13px;border-radius:20px;padding:6px 14px;z-index:9;transition:opacity .6s;pointer-events:none}
+  .shot{max-width:100%;max-height:58vh;border-radius:16px;display:block;margin:10px auto 0;box-shadow:0 6px 20px rgba(0,0,0,.25);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
   /* 완성 */
   .confetti{position:fixed;inset:0;pointer-events:none;z-index:40;overflow:hidden}
   .confetti i{position:absolute;top:-20px;font-style:normal;animation:cf linear forwards}
@@ -241,6 +249,7 @@
     </div>
   </div>
   <div class="done-banner">🎄 트리 완성! 화면을 캡처해서 인증샷을 남겨요</div>
+  <div class="donebar"><button class="pri" id="photoBtn">📸 사진 저장</button><button id="cleanBtn">🖼 캡처 화면</button></div>
   <div class="hint" id="hint"></div>
   <div class="dock"><div class="col">
     <button class="big gold" id="numBtn">🔢 숫자 넣기</button>
@@ -313,11 +322,23 @@
     <div class="menu">
       <button id="startBtn"><span>🎫</span>시작 암호 넣기</button>
       <button id="switchBtn"><span>🔁</span>꾸미는 방법 바꾸기</button>
+      <button id="photoMenu"><span>📸</span>내 트리 사진 저장</button>
+      <button id="cleanMenu"><span>🖼</span>화면만 보기(캡처용)</button>
       <button id="howBtn"><span>📖</span>놀이 방법 보기</button>
       <button id="testBtn" hidden><span>🔧</span>시안 확인 — QR 찍은 셈 치기</button>
       <button id="resetBtn" class="warn"><span>↺</span>처음부터 다시 하기</button>
     </div>
     <button class="big light" id="menuClose">닫기</button>
+  </div>
+</div>
+
+<div class="ov" id="shotOv" hidden>
+  <div class="card">
+    <h3>내 트리 사진</h3>
+    <img class="shot" id="shotImg" alt="내가 꾸민 성탄 트리">
+    <p class="sub" style="margin-top:10px" id="shotTip">「저장하기」를 눌러요. 안 되면 사진을 길게 눌러 저장해요.</p>
+    <button class="big" id="shotSave">저장하기</button>
+    <button class="big light" id="shotClose">닫기</button>
   </div>
 </div>
 
@@ -596,7 +617,7 @@ const DATA = {"stations": [{"n": 1, "code": "a4z4", "title": "약속된 아기",
   }
   function celebrate(){
     confetti(); sfx("done");
-    showMsg({got:`<img class="sp" src="${IMG.S01}">`, num:"트리 완성", title:"예수님이 오셨어요!", story:"임마누엘", text:"하나님이 우리와 함께 계셔요. 예수님, 오셔서 고맙습니다!", ref:"마태복음 1장 23절", msg:"화면을 캡처해서 내가 꾸민 트리를 인증샷으로 남기고 선생님께 보여 주세요!", ok:"내 트리 보기"});
+    showMsg({got:`<img class="sp" src="${IMG.S01}">`, num:"트리 완성", title:"예수님이 오셨어요!", story:"임마누엘", text:"하나님이 우리와 함께 계셔요. 예수님, 오셔서 고맙습니다!", ref:"마태복음 1장 23절", msg:"아래 「📸 사진 저장」으로 내가 꾸민 트리를 저장해서 선생님께 보여 주세요!", ok:"내 트리 보기"});
   }
 
   // ---------- 카드 읽기 ----------
@@ -740,6 +761,53 @@ const DATA = {"stations": [{"n": 1, "code": "a4z4", "title": "약속된 아기",
   setSound(SND.on);
   document.addEventListener("pointerdown",()=>{ if(SND.on && !(SND.mode==="el"&&SND.el&&!SND.el.paused) && !SND.src) startMusic(); },{capture:true});
   document.addEventListener("visibilitychange",()=>{ if(document.hidden) stopMusic(); else if(SND.on && SND.started) startMusic(); });
+
+  // ---------- 사진 저장 · 화면만 보기 ----------
+  const loadImg=src=>new Promise(r=>{ const im=new Image(); im.onload=()=>r(im); im.onerror=()=>r(null); im.src=src; });
+  async function makePhoto(){
+    const W=1080,H=1350, cv=document.createElement("canvas"); cv.width=W; cv.height=H; const g=cv.getContext("2d");
+    const bg=g.createLinearGradient(0,0,0,H); bg.addColorStop(0,"#0f1d3a"); bg.addColorStop(.72,"#1d3461"); bg.addColorStop(1,"#2a4a7a"); g.fillStyle=bg; g.fillRect(0,0,W,H);
+    let sd=7; const rn=()=>{ sd=(sd*16807)%2147483647; return sd/2147483647; };
+    for(let i=0;i<70;i++){ g.globalAlpha=.25+rn()*.5; g.fillStyle="#fff"; g.beginPath(); g.arc(rn()*W,rn()*H,1+rn()*2.5,0,7); g.fill(); } g.globalAlpha=1;
+    const tw=840, th=tw*1100/989, tx=(W-tw)/2, ty=150+tw*0.12;
+    const tree=await loadImg(IMG.T02||IMG.T01); if(tree) g.drawImage(tree,tx,ty,tw,th);
+    const seq=S.seq.map(k=>LCOLOR[k]).filter(Boolean);
+    if(seq.length){ g.globalCompositeOperation="screen";
+      LIGHTS.bulbs.forEach((b,i)=>{ const x=tx+b.x*tw, y=ty+b.y*th, c=seq[i%seq.length]; const rg=g.createRadialGradient(x,y,0,x,y,15);
+        rg.addColorStop(0,"rgba(255,255,255,.95)"); rg.addColorStop(.2,c); rg.addColorStop(.55,c+"55"); rg.addColorStop(1,c+"00"); g.fillStyle=rg; g.beginPath(); g.arc(x,y,15,0,7); g.fill(); });
+      g.globalCompositeOperation="source-over"; }
+    const list=S.placed.filter(p=>p.t!=="S01").slice().sort((a,b)=>a.y-b.y);
+    for(const p of list){ const im=await loadImg(IMG[p.t]); if(!im) continue; const w=tw*sizeOf(p.t)/100; g.save(); g.shadowColor="rgba(0,0,0,.3)"; g.shadowBlur=6; g.shadowOffsetY=3; g.drawImage(im,tx+p.x*tw-w/2,ty+p.y*th-w*0.42,w,w); g.restore(); }
+    const st=await loadImg(IMG.S01); if(st){ const w=tw*0.22; g.save(); if(isComplete()){ g.shadowColor="#ffe680"; g.shadowBlur=40; } else g.globalAlpha=.22; g.drawImage(st,tx+tw/2-w/2,ty-th*0.11,w,w); g.restore(); }
+    g.textAlign="center"; g.fillStyle="#ffe9a8"; g.font='44px Jua, "Gowun Dodum", sans-serif'; g.fillText(isComplete()?"내가 꾸민 성탄 트리 🎄":"내가 꾸미는 성탄 트리 🎄",W/2,96);
+    g.fillStyle="rgba(255,255,255,.75)"; g.font='26px "Gowun Dodum", sans-serif';
+    const d=new Date(); g.fillText(`${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 · 성탄 트리를 반짝반짝!`,W/2,H-40);
+    return cv;
+  }
+  let shotBlob=null;
+  async function openPhoto(){
+    $("menuOv").hidden=true; $("msgOv").hidden=true;
+    shotBlob=null; $("shotImg").removeAttribute("src"); $("shotTip").textContent="사진을 만들고 있어요…"; $("shotOv").hidden=false;
+    const cv=await makePhoto();
+    $("shotImg").src=cv.toDataURL("image/png"); $("shotTip").textContent="「저장하기」를 눌러요. 안 되면 사진을 길게 눌러 저장해요.";
+    shotBlob=await new Promise(r=>cv.toBlob(r,"image/png"));
+  }
+  $("shotSave").onclick=async()=>{
+    if(!shotBlob) return;
+    const name="성탄트리.png", file=new File([shotBlob],name,{type:"image/png"});
+    try{ if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file]}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+    try{ const a=document.createElement("a"); a.href=URL.createObjectURL(shotBlob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); $("shotTip").textContent="저장했어요! 안 보이면 사진을 길게 눌러 저장해요."; }
+    catch(e){ $("shotTip").textContent="사진을 길게 눌러 「이미지 저장」을 골라요."; }
+  };
+  $("shotClose").onclick=()=>$("shotOv").hidden=true;
+  $("photoBtn").onclick=openPhoto; $("photoMenu").onclick=openPhoto;
+  function cleanMode(){
+    $("menuOv").hidden=true; document.body.classList.add("clean");
+    const t=document.createElement("div"); t.className="cleantip"; t.textContent="지금 캡처하세요 · 화면을 누르면 돌아와요"; document.body.appendChild(t);
+    setTimeout(()=>t.style.opacity=0,2200); setTimeout(()=>t.remove(),3000);
+    setTimeout(()=>document.addEventListener("click",function back(e){ e.stopPropagation(); e.preventDefault(); document.body.classList.remove("clean"); t.remove(); document.removeEventListener("click",back,true); },true),300);
+  }
+  $("cleanBtn").onclick=cleanMode; $("cleanMenu").onclick=cleanMode;
 
   // 눈
   document.querySelectorAll(".snow").forEach(sn=>{ for(let i=0;i<+sn.dataset.n;i++){ const d=document.createElement("i"); d.style.left=Math.random()*100+"%"; const z=2+Math.random()*4; d.style.width=d.style.height=z+"px"; d.style.animationDuration=(7+Math.random()*9)+"s"; d.style.animationDelay=(-Math.random()*15)+"s"; d.style.opacity=.25+Math.random()*.5; sn.appendChild(d); } });
